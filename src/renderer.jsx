@@ -12,7 +12,7 @@ const App = () => {
 }
 
   const handleSubmit = async (commandText) => {
-    console.log("Command submitted:", commandText);
+    console.log("Input command:", commandText);
     let res = "";
 
     // Send to main process
