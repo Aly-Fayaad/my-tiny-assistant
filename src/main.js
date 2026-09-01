@@ -1,11 +1,15 @@
-import { app, BrowserWindow ,ipcMain  } from 'electron';
+import 'dotenv/config';
+import { app, BrowserWindow, ipcMain, session } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import launchApp from './features/openApp';
 import closeApp from './features/closeApp';
-
+import searchAndOpenFile from './features/searchAndOpenFile';
+import handleSystemControl from './features/systemControls';
 import { speak } from './tts';
+import { transcribeAudio } from './stt';
 import fs from 'fs';
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -36,6 +40,15 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // Setup microphone / media permissions
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media') {
+      callback(true); // allow mic access
+    } else {
+      callback(false);
+    }
+  });
+
   createWindow();
 
   // On OS X it's common to re-create a window in the app when the
@@ -66,13 +79,33 @@ ipcMain.handle('tts:speak', async (event, text, options) => {
   return audioBuffer.toString('base64');
 });
 
+ipcMain.handle('stt:transcribe', async (event, audioBuffer, mimeType) => {
+  try {
+    const text = await transcribeAudio(audioBuffer, mimeType);
+    return { success: true, text };
+  } catch (error) {
+    console.error('STT Transcription error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle("open-app", async (event, commandText) => {
   console.log(commandText);
-  
   return launchApp(commandText);
 });
 
 ipcMain.handle("close-app", async(event, commandText) =>{
-  console.log(commandText)
-  return closeApp(commandText)
-})
+  console.log(commandText);
+  return closeApp(commandText);
+});
+
+ipcMain.handle("search-and-open", async (event, query, typeFilter) => {
+  console.log("Search and open:", { query, typeFilter });
+  return searchAndOpenFile(query, typeFilter);
+});
+
+ipcMain.handle("system-control", async (event, action, value) => {
+  console.log("System control:", { action, value });
+  return handleSystemControl(action, value);
+});
+
