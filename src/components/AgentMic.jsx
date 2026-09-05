@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useWhisperSTT } from '../hooks/useWhisperSTT';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 
 export default function AgentMic({ onCommand }) {
   const [transcript, setTranscript] = useState('');
@@ -10,16 +10,16 @@ export default function AgentMic({ onCommand }) {
     isRecording,
     isTranscribing,
     error,
-  } = useWhisperSTT({
+  } = useSpeechRecognition({
     onTranscribe: (text) => {
       setTranscript(text);
-      console.log('Whisper transcribed:', text);
+      console.log('Transcribed:', text);
       if (onCommand) {
         onCommand(text);
       }
     },
     onError: (err) => {
-      console.error('Whisper error:', err);
+      console.error('Speech recognition error:', err);
     },
   });
 
@@ -32,49 +32,31 @@ export default function AgentMic({ onCommand }) {
   };
 
   return (
-    <div style={{ marginTop: '1rem', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+    <div className="mic-controls">
       <button
         onClick={handleClick}
         disabled={isTranscribing}
-        style={{
-          padding: '8px 16px',
-          cursor: isTranscribing ? 'not-allowed' : 'pointer',
-          backgroundColor: isRecording ? '#ff4d4f' : '#1890ff',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          fontWeight: 'bold',
-        }}
+        className={`mic-btn ${isRecording ? 'recording' : ''} ${isTranscribing ? 'transcribing' : ''}`}
+        title="Click to speak a command"
       >
+        {isRecording ? <div className="mic-dot" /> : '🎤'}
         {isRecording
-          ? '🔴 Stop & Transcribe'
+          ? 'Stop & Process'
           : isTranscribing
-          ? '⏳ Transcribing with Whisper...'
-          : '🎤 Speak Command'}
+          ? 'Processing...'
+          : 'Voice Command'}
       </button>
 
-      {isRecording && (
-        <p style={{ color: '#ff4d4f', margin: '0.5rem 0', fontWeight: '500' }}>
-          Listening... Click Stop when finished speaking.
-        </p>
-      )}
-
-      {isTranscribing && (
-        <p style={{ color: '#1890ff', margin: '0.5rem 0' }}>
-          Sending audio to OpenAI Whisper...
-        </p>
-      )}
-
       {error && (
-        <p style={{ color: 'red', margin: '0.5rem 0' }}>
-          Error: {error}
-        </p>
+        <div className="error-pill">
+          ⚠️ {error}
+        </div>
       )}
 
-      {transcript && (
-        <p style={{ margin: '0.5rem 0' }}>
-          <strong>Last heard:</strong> {transcript}
-        </p>
+      {transcript && !isRecording && !isTranscribing && !error && (
+        <div className="transcript-pill">
+          "{transcript}"
+        </div>
       )}
     </div>
   );

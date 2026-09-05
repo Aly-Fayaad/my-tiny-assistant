@@ -10,14 +10,27 @@ export default function CommandInput({ onSubmit }) {
     }
   };
 
+  const handleSend = () => {
+    if (value.trim()) {
+      onSubmit(value.trim());
+      setValue('');
+    }
+  };
+
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      onKeyDown={handleKeyDown}
-      placeholder='Type a command, e.g. "open google"'
-      autoFocus
-    />
+    <div className="command-input-wrapper">
+      <input
+        type="text"
+        className="command-input"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder='Type a command, e.g. "open spotify"'
+        autoFocus
+      />
+      <button className="send-btn" onClick={handleSend} title="Send Command">
+        ➔
+      </button>
+    </div>
   );
 }
