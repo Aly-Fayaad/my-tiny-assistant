@@ -4,6 +4,9 @@ A lightweight, powerful, and visually stunning desktop voice assistant built wit
 
 ## Features
 
+<img width="777" height="592" alt="image" src="https://github.com/user-attachments/assets/fb0fb63f-6fa4-450a-a153-4de07a543b2e" />
+
+
 - **Voice Commands**: Control your system using your voice with accurate Speech-to-Text transcription.
 - **System Controls**: Adjust volume and screen brightness (e.g., "volume up", "brightness down").
 - **App Management**: Launch or force-close applications on your computer (e.g., "open spotify", "close browser").
